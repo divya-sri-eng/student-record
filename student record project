@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Student {
+    int rollNo;
+    char name[50];
+    float marks;
+};
+
+void addStudent() {
+    FILE *f = fopen("students.txt", "a");
+    struct Student s;
+    printf("Enter Roll No: ");
+    scanf("%d", &s.rollNo);
+    printf("Enter Name: ");
+    scanf(" %[^\n]", s.name);
+    printf("Enter Marks: ");
+    scanf("%f", &s.marks);
+    fwrite(&s, sizeof(struct Student), 1, f);
+    fclose(f);
+    printf("Student Added Successfully.\n");
+}
+
+void viewStudents() {
+    FILE *f = fopen("students.txt", "r");
+    struct Student s;
+    printf("\n--- All Student Records ---\n");
+    while(fread(&s, sizeof(struct Student), 1, f)) {
+        printf("Roll No: %d\nName: %s\nMarks: %.2f\n\n", s.rollNo, s.name, s.marks);
+    }
+    fclose(f);
+}
+
+void searchStudent() {
+    FILE *f = fopen("students.txt", "r");
+    int roll, found = 0;
+    struct Student s;
+    printf("Enter Roll No to Search: ");
+    scanf("%d", &roll);
+    while(fread(&s, sizeof(struct Student), 1, f)) {
+        if(s.rollNo == roll) {
+            printf("Record Found:\n");
+            printf("Roll No: %d\nName: %s\nMarks: %.2f\n", s.rollNo, s.name, s.marks);
+            found = 1;
+            break;
+        }
+    }
+    if(!found)
+        printf("Record Not Found.\n");
+    fclose(f);
+}
+
+void deleteStudent() {
+    FILE *f = fopen("students.txt", "r");
+    FILE *temp = fopen("temp.txt", "w");
+    int roll, found = 0;
+    struct Student s;
+    printf("Enter Roll No to Delete: ");
+    scanf("%d", &roll);
+    while(fread(&s, sizeof(struct Student), 1, f)) {
+        if(s.rollNo != roll) {
+            fwrite(&s, sizeof(struct Student), 1, temp);
+        } else {
+            found = 1;
+        }
+    }
+    fclose(f);
+    fclose(temp);
+    remove("students.txt");
+    rename("temp.txt", "students.txt");
+    if(found)
+        printf("Record Deleted Successfully.\n");
+    else
+        printf("Record Not Found.\n");
+}
+
+int main() {
+    int choice;
+    do {
+        printf("\n--- Student Record System ---\n");
+        printf("1. Add Student\n");
+        printf("2. View Students\n");
+        printf("3. Search Student\n");
+        printf("4. Delete Student\n");
+        printf("5. Exit\n");
+        printf("Enter Choice: ");
+        scanf("%d", &choice);
+
+        switch(choice) {
+            case 1: addStudent(); break;
+            case 2: viewStudents(); break;
+            case 3: searchStudent(); break;
+            case 4: deleteStudent(); break;
+            case 5: printf("Exiting...\n"); break;
+            default: printf("Invalid Choice.\n");
+        }
+    } while(choice != 5);
+    return 0;
+}
